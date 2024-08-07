@@ -19,47 +19,43 @@ db.init_app(app)
 def index():
     return '<h1>Bakery GET API</h1>'
 
+# This endpoint will return a list of JSON objects for all backeries in the db
 @app.route('/bakeries')
 def bakeries():
-    data = []
+    bakeries_available = []
 
-    goods = Bakery.query.all()
+    for bakery in Bakery.query.all():
+        bakery_dict = bakery.to_dict()
+        bakeries_available.append(bakery_dict)
 
-    for good in goods:
-        data.append(good.to_dict())
-
-    response = make_response(jsonify(data), 200)
+    response = make_response(bakeries_available, 200)
 
     return response
 
 @app.route('/bakeries/<int:id>')
 def bakery_by_id(id):
-    data = []
-
-    good = Bakery.query.filter(Bakery.id == id).first()
-
-    data.append(good.to_dict())
-
-    response  = make_response(jsonify(data), 200)
-
+    bakery = Bakery.query.filter(Bakery.id == id).first()
+    bakery_dict = bakery.to_dict()
+    response = make_response(bakery_dict, 200)
     return response
 
 @app.route('/baked_goods/by_price')
 def baked_goods_by_price():
-    baked_goods = BakedGood.query.order_by(desc(BakedGood.price)).all()
+    sorted_bakeries = []
 
-    data = [good.to_dict() for good in baked_goods]
-
-    response = make_response(jsonify(data), 200)
+    for bakery in BakedGood.query.order_by(BakedGood.price).all():
+        bakery_dict = bakery.to_dict()
+        sorted_bakeries.append(bakery_dict)
+    
+    response = make_response(sorted_bakeries, 200)
 
     return response
 
 @app.route('/baked_goods/most_expensive')
 def most_expensive_baked_good():
-    backed_good = BakedGood.query.order_by(desc(BakedGood.price)).first()
-
-    response = (jsonify(backed_good.to_dict()), 200)
-
+    expensive_baked = BakedGood.query.order_by(desc(BakedGood.price)).first()
+    expensive_dict = expensive_baked.to_dict()
+    response = make_response(expensive_dict, 200)
     return response
 
 if __name__ == '__main__':
